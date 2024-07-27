@@ -34,7 +34,6 @@ class GenreList(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -43,18 +42,21 @@ class GenreDetail(APIView):
         return get_object_or_404(Genre, pk=pk)
 
     def get(self, request, pk: int) -> Response:
-        serializer = GenreSerializer(self.get_object(pk=pk))
+        genre = self.get_object(pk=pk)
+        serializer = GenreSerializer(genre)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, pk: int) -> Response:
-        serializer = GenreSerializer(self.get_object(pk=pk), data=request.data)
+        genre = self.get_object(pk=pk)
+        serializer = GenreSerializer(genre, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk: int) -> Response:
-        self.get_object(pk=pk).delete()
+        genre = self.get_object(pk=pk)
+        genre.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -64,15 +66,14 @@ class ActorList(generics.GenericAPIView):
 
     def get(self, request) -> Response:
         actors = self.get_queryset()
-        serializer = self.get_serializer_class()(actors, many=True)
+        serializer = self.get_serializer(actors, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request) -> Response:
-        serializer = MovieSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -111,6 +112,6 @@ class CinemaHallViewSet(
     serializer_class = CinemaHallSerializer
 
 
-class MovieViewSet(viewsets.ModelViewSet,):
+class MovieViewSet(viewsets.ModelViewSet):
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer

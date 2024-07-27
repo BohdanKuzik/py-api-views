@@ -38,10 +38,12 @@ urlpatterns = [
     path(
         "movies/<int:pk>/",
         include(router.urls),
+        name="movie-detail"
     ),
     path(
         "actors/",
         ActorList.as_view(),
+        name="actor-list"
     ),
     path(
         "actors/<int:pk>/",
